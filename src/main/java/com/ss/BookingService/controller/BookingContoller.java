@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ss.BookingService.broker.JMSProducer;
 import com.ss.BookingService.entity.Booking;
 import com.ss.BookingService.exceptions.BookingNotFoundException;
 import com.ss.BookingService.service.BookingService;
@@ -22,9 +23,18 @@ import com.ss.BookingService.service.BookingService;
 @RestController
 public class BookingContoller {
 	
+	@Autowired
+    JMSProducer jmsProducer;
 	
 	@Autowired  
 	BookingService bookingService;
+	
+	@PostMapping(value="/jms/Booking")
+    public Booking sendMessage(@PathVariable("bookingid") long bookingid){
+		Booking availableSeats = bookingService.fetchBooking(bookingid);
+    	jmsProducer.sendMessage(availableSeats);
+        return availableSeats;
+    }
 	
 	
 	@GetMapping("/booking")  
